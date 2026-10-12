@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api.routes import router
-from core import config
+from core import config, hardware
 from core.health import check_dependencies
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -16,6 +16,7 @@ log = logging.getLogger("shorts")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    profile = hardware.apply_profile()
     deps = check_dependencies()
     if deps["ffmpeg"]["ok"]:
         log.info("ffmpeg OK: %s", deps["ffmpeg"]["path"])
@@ -37,6 +38,11 @@ async def lifespan(app: FastAPI):
         "Hardware: %s núcleos, %.1f GB RAM | Whisper '%s' en %s (%s, bloques de %d s) | video: %s",
         hw["cpu_cores"], hw["ram_gb"], config.WHISPER_MODEL, hw["whisper_device"],
         hw["whisper_compute_type"], hw["transcribe_chunk_seconds"], hw["video_encoder"],
+    )
+    log.info(
+        "Perfil de recursos: IA '%s' | Whisper en memoria entre tareas: %s | prioridad: %s | %.1f GB RAM libres",
+        profile["ollama_model"], "sí" if profile["whisper_keep_loaded"] else "no",
+        profile["priority"], hw["ram_free_gb"],
     )
     yield
 

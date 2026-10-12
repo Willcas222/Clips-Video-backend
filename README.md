@@ -86,6 +86,13 @@ Al arrancar, el backend detecta el equipo y lo muestra en consola y en `GET /api
 | Tamaño de bloque de transcripción | Según la RAM: 5 min (<8 GB), 10 min (8 GB), 15 min (16 GB), 30 min (32 GB+). Memoria fija sea cual sea la duración del video |
 | Codificador de video | NVIDIA NVENC → AMD AMF → Intel QSV → libx264 (CPU). Si la GPU falla en un clip, se reintenta en CPU |
 | Ollama | Usa la GPU automáticamente si la hay; el contexto se ajusta al tamaño de la transcripción |
+| Modelo de IA (`OLLAMA_MODEL=auto`) | `qwen2.5:7b` con 16 GB de RAM o GPU de 8 GB+; si no, `qwen2.5:3b` (`1.5b` con menos de 8 GB). Solo entre los modelos descargados; `instalar.bat` descarga el adecuado |
+| Modelo de Whisper (`WHISPER_MODEL=auto`) | CPU → `small`; GPU NVIDIA → `medium` (5 GB+ de VRAM) o `large-v3` (8 GB+) |
+| Whisper en memoria (`WHISPER_KEEP_LOADED=auto`) | Sí con 16 GB de RAM o GPU; si no, se libera tras transcribir |
+| RAM libre antes del análisis | Si el modelo no cabe en la RAM libre en ese momento, se libera Whisper y, si aún no cabe, se usa un modelo menor ya descargado en vez de paginar a disco |
+| Prioridad (`PROCESS_PRIORITY=auto`) | Por debajo de lo normal: Whisper y ffmpeg solo usan la CPU sobrante y el equipo sigue respondiendo |
+
+Los umbrales de RAM admiten la memoria que Windows reserva para la gráfica integrada (un equipo de 16 GB que muestra 13,9 GB cuenta como de 16 GB). Cualquier valor `auto` se puede fijar a mano en `.env`.
 
 ### Pasar a un equipo más potente
 1. Clona los dos repositorios (ver **Instalación en un equipo nuevo**).
@@ -105,14 +112,15 @@ Todo se ajusta en `.env` (plantilla en `.env.example`) o con variables de entorn
 | Variable | Por defecto | Descripción |
 |---|---|---|
 | `OLLAMA_HOST` | `http://127.0.0.1:11434` | Servidor de Ollama |
-| `OLLAMA_MODEL` | `qwen2.5:3b` | Modelo para el análisis |
+| `OLLAMA_MODEL` | `auto` | Modelo para el análisis (auto = según el equipo) |
 | `MAX_TRANSCRIPT_CHARS` | `40000` | Texto máximo enviado a Ollama (los videos largos se muestrean) |
-| `WHISPER_MODEL` | `small` | `base` es ~3× más rápido pero comete errores visibles en los subtítulos (≈10 % de palabras distintas en español); `medium`/`large-v3` para GPU |
+| `WHISPER_MODEL` | `auto` | auto = `small` en CPU; `base` es ~3× más rápido pero comete errores visibles en los subtítulos (≈10 % de palabras distintas en español); `medium`/`large-v3` para GPU |
 | `WHISPER_BEAM_SIZE` | `1` | `1` = voraz (rápido); `5` = búsqueda en haz (~40 % más lento, misma calidad práctica) |
 | `WHISPER_DEVICE` | `auto` | `auto`, `cuda` o `cpu` |
 | `WHISPER_CPU_THREADS` | `0` | `0` = núcleos físicos detectados |
 | `TRANSCRIBE_CHUNK_SECONDS` | `auto` | Bloque de transcripción en segundos (auto = según RAM) |
-| `WHISPER_KEEP_LOADED` | `0` | `1` mantiene Whisper en RAM entre tareas |
+| `WHISPER_KEEP_LOADED` | `auto` | `1` mantiene Whisper en RAM entre tareas (auto = sí con 16 GB o GPU) |
+| `PROCESS_PRIORITY` | `auto` | `auto` = por debajo de lo normal; `normal` para máxima velocidad con el equipo dedicado |
 | `VIDEO_ENCODER` | `auto` | `auto`, `h264_nvenc`, `h264_amf`, `h264_qsv`, `libx264` |
 | `VIDEO_BITRATE` | `3500k` | Calidad/peso del short: 3500k ≈ 13 MB por 30 s |
 | `NUM_CLIPS` | `3` | Clips por video |

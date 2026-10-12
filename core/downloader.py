@@ -49,6 +49,8 @@ def _friendly_error(msg: str) -> str:
 
 MAX_ATTEMPTS = 3
 RETRY_WAIT_SECONDS = 5
+# Error de ffmpeg si una lectura de red pasa 30 s sin datos (en microsegundos); se reintenta
+FFMPEG_NET_TIMEOUT = ["-rw_timeout", "30000000"]
 # Fallos pasajeros de YouTube/red que suelen resolverse reintentando
 _TRANSIENT = ("http error 403", "http error 429", "http error 5", "timed out", "timeout",
               "connection reset", "connection aborted", "temporarily", "remote end closed",
@@ -82,6 +84,10 @@ def _base_opts() -> dict:
         # Reintentos internos de yt-dlp para cortes a mitad de descarga
         "retries": 5,
         "fragment_retries": 5,
+        "socket_timeout": 30,
+        # Los fragmentos (download_ranges) los baja ffmpeg, que sin timeout se queda colgado
+        # para siempre si el servidor deja de enviar datos sin cerrar la conexión
+        "external_downloader_args": {"ffmpeg_i": FFMPEG_NET_TIMEOUT},
     }
     runtimes = _js_runtimes()
     if runtimes:
@@ -192,7 +198,7 @@ def _ffmpeg_audio(media_url: str, headers: dict, out_wav: Path, duration: float,
     Windows falla con descargas paralelas) y no deja miles de fragmentos ni archivos
     intermedios en disco. Medido: ~50× tiempo real con la variante de 160p de Kick.
     """
-    cmd = [get_ffmpeg(), "-v", "error", "-nostats", "-progress", "pipe:1", "-y"]
+    cmd = [get_ffmpeg(), "-v", "error", "-nostats", "-progress", "pipe:1", "-y", *FFMPEG_NET_TIMEOUT]
     if headers:
         cmd += ["-headers", "".join(f"{k}: {v}\r\n" for k, v in headers.items())]
     cmd += ["-i", media_url, "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", str(out_wav)]

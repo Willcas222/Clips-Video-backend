@@ -13,7 +13,7 @@ import time
 import uuid
 from dataclasses import asdict, dataclass, field
 
-from . import analyzer, config, downloader, editor, sync, transcriber
+from . import analyzer, config, downloader, editor, hardware, sync, transcriber
 
 log = logging.getLogger("shorts.pipeline")
 
@@ -96,6 +96,8 @@ def run(task_id: str, model: str | None = None) -> None:
             # C. Análisis por bloques
             _update(task, stage="analyze", progress=50,
                     message="IA analizando el contenido buscando momentos virales...")
+            # Si la RAM libre no basta para el modelo, libera Whisper o usa uno menor
+            model = hardware.fit_ollama_model(model or config.OLLAMA_MODEL, transcriber.unload)
             clips = analyzer.analyze(
                 tr["segments"], audio.duration, model=model,
                 on_progress=lambda i, n: _update(
