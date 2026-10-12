@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import time
 import wave
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -202,17 +203,23 @@ def _ffmpeg_audio(media_url: str, headers: dict, out_wav: Path, duration: float,
     if headers:
         cmd += ["-headers", "".join(f"{k}: {v}\r\n" for k, v in headers.items())]
     cmd += ["-i", media_url, "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", str(out_wav)]
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    # stderr va al mismo pipe que el progreso: si se leyera aparte al final, los avisos de
+    # decodificación del video (Kick escribe ~11 KB al empezar, aunque solo se pida el audio)
+    # llenan su búfer de 4 KB y ffmpeg se queda bloqueado para siempre sin descargar nada.
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                             encoding="utf-8", errors="replace")
+    errors: deque[str] = deque(maxlen=10)
     for line in proc.stdout:
-        if on_progress and duration and line.startswith("out_time_us="):
-            try:
-                on_progress(min(1.0, int(line.split("=")[1]) / 1e6 / duration))
-            except ValueError:
-                pass
-    err = proc.stderr.read()
+        if line.startswith("out_time_us="):
+            if on_progress and duration:
+                try:
+                    on_progress(min(1.0, int(line.split("=")[1]) / 1e6 / duration))
+                except ValueError:
+                    pass
+        elif line.startswith("[") or "=" not in line:  # las de progreso son clave=valor
+            errors.append(line.strip())
     if proc.wait() != 0:
-        raise RuntimeError(f"ffmpeg exited with code {proc.returncode}: {err.strip()[-500:]}")
+        raise RuntimeError(f"ffmpeg exited with code {proc.returncode}: {' | '.join(errors)[-500:]}")
 
 
 def download_audio(url: str, work_dir: Path, on_progress=None) -> AudioResult:
