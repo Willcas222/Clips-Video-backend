@@ -16,9 +16,9 @@ log = logging.getLogger("shorts.analyzer")
 
 SYSTEM_PROMPT = (
     "Analiza esta porción de transcripción de un stream. Busca momentos de alta intensidad, "
-    "chistes, declaraciones polémicas, o reacciones exageradas. Si encuentras un momento viral, "
+    "chistes, declaraciones polémicas, o reacciones exageradas. {pick}, "
     "devuelve el timestamp de inicio, el timestamp de fin (duración entre {min_s} y {max_s} "
-    "segundos), y un título. Si no hay nada interesante en este bloque, devuelve una lista vacía.\n"
+    "segundos), y un título. {empty}\n"
     "Responde ÚNICAMENTE con un JSON válido con esta estructura: "
     '{{"clips": [{{"title": "título gancho", "start_time": seg_inicio, "end_time": seg_fin, '
     '"reason": "por qué es viral", "score": 1-10}}]}}. '
@@ -27,6 +27,14 @@ SYSTEM_PROMPT = (
     "solaparse. score indica lo viral que es (10 = muy viral). El título debe tener como máximo "
     "8 palabras. Escribe el título y la razón en el idioma de la transcripción."
 )
+# Muchos bloques: cada uno puede quedar vacío y al final se eligen los mejores entre todos.
+PICK_ANY = ("Si encuentras un momento viral",
+            "Si no hay nada interesante en este bloque, devuelve una lista vacía.")
+# Pocos bloques (videos cortos): con "si encuentras" los modelos suelen devolver un solo
+# momento y el resto se rellena a ciegas. Medido con qwen2.5:7b en una charla de 14 min:
+# 1 clip con PICK_ANY, 3 clips con sentido con PICK_EXACT.
+PICK_EXACT = ("Elige los {per_chunk} mejores momentos y, para cada uno",
+              "Devuelve exactamente {per_chunk} momentos aunque alguno sea menos llamativo (pon un score bajo).")
 
 
 class AnalyzerError(Exception):
@@ -196,10 +204,12 @@ def analyze(segments: list[dict], duration: float, model: str | None = None,
         return [{"title": "Clip completo", "start_time": 0.0, "end_time": round(duration, 2),
                  "reason": "El video es más corto que la duración mínima de un clip"}]
 
-    system = SYSTEM_PROMPT.format(min_s=config.CLIP_MIN_SECONDS, max_s=config.CLIP_MAX_SECONDS,
-                                  per_chunk=config.NUM_CLIPS)
-    client = ollama.Client(host=config.OLLAMA_HOST)
     chunks = _chunks(segments, duration)
+    pick, empty = PICK_EXACT if len(chunks) <= config.NUM_CLIPS else PICK_ANY
+    system = SYSTEM_PROMPT.format(min_s=config.CLIP_MIN_SECONDS, max_s=config.CLIP_MAX_SECONDS,
+                                  per_chunk=config.NUM_CLIPS, pick=pick.format(per_chunk=config.NUM_CLIPS),
+                                  empty=empty.format(per_chunk=config.NUM_CLIPS))
+    client = ollama.Client(host=config.OLLAMA_HOST)
     candidates: list[dict] = []
     try:
         for i, (w0, w1, segs) in enumerate(chunks, start=1):
