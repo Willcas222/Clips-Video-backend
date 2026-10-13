@@ -24,6 +24,7 @@ class Task:
     url: str
     # True = el streamer permite clips: render ligero (pantalla completa, audio original)
     is_streamer_friendly: bool = False
+    num_clips: int = config.NUM_CLIPS
     status: str = "queued"  # queued | running | completed | error
     stage: str = "queued"
     message: str = "En cola..."
@@ -46,8 +47,9 @@ _tasks_lock = threading.Lock()
 _run_lock = threading.Lock()
 
 
-def create_task(url: str, is_streamer_friendly: bool = False) -> Task:
-    task = Task(id=uuid.uuid4().hex[:12], url=url, is_streamer_friendly=is_streamer_friendly)
+def create_task(url: str, is_streamer_friendly: bool = False, num_clips: int | None = None) -> Task:
+    task = Task(id=uuid.uuid4().hex[:12], url=url, is_streamer_friendly=is_streamer_friendly,
+                num_clips=num_clips or config.NUM_CLIPS)
     with _tasks_lock:
         _tasks[task.id] = task
     return task
@@ -99,7 +101,7 @@ def run(task_id: str, model: str | None = None) -> None:
             # Si la RAM libre no basta para el modelo, libera Whisper o usa uno menor
             model = hardware.fit_ollama_model(model or config.OLLAMA_MODEL, transcriber.unload)
             clips = analyzer.analyze(
-                tr["segments"], audio.duration, model=model,
+                tr["segments"], audio.duration, model=model, num_clips=task.num_clips,
                 on_progress=lambda i, n: _update(
                     task, progress=50 + int(20 * (i - 1) / n),
                     message=f"IA analizando el contenido buscando momentos virales... (bloque {i} de {n})"),

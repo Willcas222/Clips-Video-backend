@@ -4,7 +4,7 @@ from typing import Annotated
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, WebSocket, WebSocketDisconnect
-from pydantic import AfterValidator, BaseModel
+from pydantic import AfterValidator, BaseModel, Field
 
 from core import pipeline
 from core.health import check_dependencies
@@ -31,6 +31,8 @@ class ProcessRequest(BaseModel):
     # True = el streamer permite el uso de sus clips: se omite el procesado anti-copyright
     # (split-screen y pitch shift) y se renderiza a pantalla completa con el audio original.
     is_streamer_friendly: bool = False
+    # Clips a generar; si no se indica, NUM_CLIPS del .env
+    num_clips: int | None = Field(default=None, ge=1, le=10)
 
 
 @router.get("/health")
@@ -40,7 +42,7 @@ def health():
 
 @router.post("/process")
 def process(req: ProcessRequest, background: BackgroundTasks):
-    task = pipeline.create_task(req.url, req.is_streamer_friendly)
+    task = pipeline.create_task(req.url, req.is_streamer_friendly, req.num_clips)
     # BackgroundTasks ejecuta funciones síncronas en el threadpool: no bloquea el event loop
     background.add_task(pipeline.run, task.id, req.model)
     return {"task_id": task.id}

@@ -2,10 +2,11 @@
 
 La transcripción se divide en bloques (por defecto 15 min con 1 min de solape) para no
 saturar el contexto del modelo; cada bloque se analiza por separado y al final se unifican
-los candidatos y se quedan los NUM_CLIPS con mejor puntuación.
+los candidatos y se quedan los N (NUM_CLIPS o los pedidos) con mejor puntuación.
 """
 import json
 import logging
+import math
 import re
 
 import ollama
@@ -35,6 +36,19 @@ PICK_ANY = ("Si encuentras un momento viral",
 # 1 clip con PICK_ANY, 3 clips con sentido con PICK_EXACT.
 PICK_EXACT = ("Elige los {per_chunk} mejores momentos y, para cada uno",
               "Devuelve exactamente {per_chunk} momentos aunque alguno sea menos llamativo (pon un score bajo).")
+
+
+def _schema(per_chunk: int) -> dict:
+    """Esquema que Ollama impone al generar: sin él, el modelo a veces se inventa otra estructura
+    (medido con qwen2.5:7b en un stream de 47 min: 2 de 4 bloques devolvieron JSON inservible)."""
+    clip = {
+        "type": "object",
+        "properties": {"title": {"type": "string"}, "start_time": {"type": "number"},
+                       "end_time": {"type": "number"}, "reason": {"type": "string"}, "score": {"type": "number"}},
+        "required": ["title", "start_time", "end_time", "reason", "score"],
+    }
+    return {"type": "object", "properties": {"clips": {"type": "array", "items": clip, "maxItems": per_chunk}},
+            "required": ["clips"]}
 
 
 class AnalyzerError(Exception):
@@ -130,7 +144,7 @@ class _OllamaUnavailable(Exception):
     pass
 
 
-def _ask(client, model: str, system: str, user: str) -> list:
+def _ask(client, model: str, system: str, user: str, per_chunk: int) -> list:
     """Clips crudos de un bloque. Los modelos pequeños a veces entran en bucle o devuelven JSON
     roto: un segundo intento con otra temperatura suele bastar."""
     for attempt, temperature in enumerate((0.4, 0.8), start=1):
@@ -138,13 +152,13 @@ def _ask(client, model: str, system: str, user: str) -> list:
             resp = client.chat(
                 model=model,
                 messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-                format="json",
+                format=_schema(per_chunk),
                 options={
                     "temperature": temperature,
                     "num_ctx": _num_ctx(len(system) + len(user)),
                     "repeat_penalty": 1.15,
                     # ~120 tokens por clip en JSON; tope para cortar respuestas desbocadas
-                    "num_predict": 200 * config.NUM_CLIPS + 200,
+                    "num_predict": 200 * per_chunk + 200,
                 },
                 # Entre bloques se mantiene cargado; se libera al terminar el análisis
                 keep_alive="2m",
@@ -172,30 +186,34 @@ def _unload(client, model: str) -> None:
         pass
 
 
-def _fill(clips: list[dict], duration: float, reason: str) -> list[dict]:
-    """Completa hasta NUM_CLIPS con tramos repartidos por el video que no se solapen con los elegidos."""
-    n = config.NUM_CLIPS
+def _fill(clips: list[dict], duration: float, reason: str, n: int) -> list[dict]:
+    """Completa hasta n clips con tramos repartidos por el video que no se solapen con los elegidos."""
     length = min(config.CLIP_MAX_SECONDS, max(config.CLIP_MIN_SECONDS, duration / n))
     if duration <= length:
         return clips or [{"title": "Clip 1", "start_time": 0.0, "end_time": round(duration, 2), "reason": "Video completo"}]
     result = list(clips)
     # Candidatos en una rejilla fina para encontrar huecos entre los clips de la IA
     steps = max(n, int(duration // (length / 2)))
-    for i in range(steps + 1):
-        if len(result) >= n:
+    grid = [i * (duration - length) / steps for i in range(steps + 1)]
+    while len(result) < n:
+        free = [s for s in grid if not _overlaps(s, s + length, result, tolerance=0)]
+        if not free:
             break
-        s = i * (duration - length) / steps
-        if not _overlaps(s, s + length, result, tolerance=0):
-            result.append({"title": f"Momento {int(s // 60)}:{int(s % 60):02d}", "start_time": round(s, 2),
-                           "end_time": round(s + length, 2), "reason": reason})
+        # El hueco más alejado de los clips ya elegidos: así los rellenos quedan repartidos
+        # por todo el video en lugar de amontonarse al principio
+        mids = [(c["start_time"] + c["end_time"]) / 2 for c in result]
+        s = max(free, key=lambda s: min((abs(s + length / 2 - m) for m in mids), default=-s))
+        result.append({"title": f"Momento {int(s // 60)}:{int(s % 60):02d}", "start_time": round(s, 2),
+                       "end_time": round(s + length, 2), "reason": reason})
     return sorted(result, key=lambda c: c["start_time"])
 
 
 def analyze(segments: list[dict], duration: float, model: str | None = None,
-            on_progress=None) -> list[dict]:
-    """Devuelve los NUM_CLIPS mejores momentos (tiempos absolutos), ordenados por tiempo.
-    on_progress(i, n) se llama al empezar cada bloque."""
+            on_progress=None, num_clips: int | None = None) -> list[dict]:
+    """Devuelve los num_clips (por defecto NUM_CLIPS) mejores momentos (tiempos absolutos),
+    ordenados por tiempo. on_progress(i, n) se llama al empezar cada bloque."""
     model = model or config.OLLAMA_MODEL
+    n = num_clips or config.NUM_CLIPS
     if not segments:
         raise AnalyzerError("La transcripción está vacía: el video no parece tener voz.")
 
@@ -205,10 +223,13 @@ def analyze(segments: list[dict], duration: float, model: str | None = None,
                  "reason": "El video es más corto que la duración mínima de un clip"}]
 
     chunks = _chunks(segments, duration)
-    pick, empty = PICK_EXACT if len(chunks) <= config.NUM_CLIPS else PICK_ANY
+    # Momentos pedidos por bloque: los necesarios repartidos entre bloques más uno de margen
+    # (mínimo 3). Pedir los n en cada bloque solo alarga la respuesta del modelo.
+    per_chunk = min(n, max(3, math.ceil(n / len(chunks)) + 1))
+    pick, empty = PICK_EXACT if len(chunks) <= n else PICK_ANY
     system = SYSTEM_PROMPT.format(min_s=config.CLIP_MIN_SECONDS, max_s=config.CLIP_MAX_SECONDS,
-                                  per_chunk=config.NUM_CLIPS, pick=pick.format(per_chunk=config.NUM_CLIPS),
-                                  empty=empty.format(per_chunk=config.NUM_CLIPS))
+                                  per_chunk=per_chunk, pick=pick.format(per_chunk=per_chunk),
+                                  empty=empty.format(per_chunk=per_chunk))
     client = ollama.Client(host=config.OLLAMA_HOST)
     candidates: list[dict] = []
     try:
@@ -219,7 +240,7 @@ def analyze(segments: list[dict], duration: float, model: str | None = None,
             local = [{**sg, "start": sg["start"] - w0, "end": sg["end"] - w0} for sg in segs]
             user = (f"Porción {i} de {len(chunks)} ({w1 - w0:.0f} s).\n\n"
                     f"Transcripción:\n{_format_transcript(local)}")
-            for raw in _ask(client, model, system, user):
+            for raw in _ask(client, model, system, user, per_chunk):
                 clip = _normalize_clip(raw, w0, w0, w1)
                 if clip:
                     candidates.append(clip)
@@ -232,15 +253,15 @@ def analyze(segments: list[dict], duration: float, model: str | None = None,
     # Unificar: los mejores primero, descartando los que se solapan con uno mejor
     best: list[dict] = []
     for clip in sorted(candidates, key=lambda c: c["score"], reverse=True):
-        if len(best) >= config.NUM_CLIPS:
+        if len(best) >= n:
             break
         if not _overlaps(clip["start_time"], clip["end_time"], best):
             best.append(clip)
 
     if not best:
         log.warning("Ollama no devolvió clips utilizables; usando selección automática.")
-        return _fill([], duration, "Selección automática (el análisis con IA no estuvo disponible)")
-    if len(best) < config.NUM_CLIPS:
-        log.info("Ollama devolvió %d de %d clips; completando automáticamente.", len(best), config.NUM_CLIPS)
-        best = _fill(best, duration, "Selección automática para completar los clips")
+        return _fill([], duration, "Selección automática (el análisis con IA no estuvo disponible)", n)
+    if len(best) < n:
+        log.info("Ollama devolvió %d de %d clips; completando automáticamente.", len(best), n)
+        best = _fill(best, duration, "Selección automática para completar los clips", n)
     return sorted(best, key=lambda c: c["start_time"])
