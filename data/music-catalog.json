@@ -1,0 +1,179 @@
+{
+  "_info": "Catálogo de canciones reales del que la IA elige. Puedes añadir géneros o canciones: 'aliases' son palabras que activan el género al escribir el tipo de música; 'moods' ayudan a la IA a elegir según el contexto. Reinicia el backend tras editarlo.",
+  "genres": [
+    {
+      "genre": "Reggaetón",
+      "aliases": ["reggaeton", "regueton", "urbano", "perreo", "dembow", "latino urbano"],
+      "songs": [
+        { "title": "Gasolina", "artist": "Daddy Yankee", "moods": ["fiesta", "energía", "clásico"] },
+        { "title": "Con Calma", "artist": "Daddy Yankee ft. Snow", "moods": ["fiesta", "divertido", "baile"] },
+        { "title": "Despacito", "artist": "Luis Fonsi ft. Daddy Yankee", "moods": ["sensual", "verano", "baile"] },
+        { "title": "Tusa", "artist": "Karol G & Nicki Minaj", "moods": ["empoderador", "desamor", "fiesta"] },
+        { "title": "Provenza", "artist": "Karol G", "moods": ["relajado", "verano", "buena vibra"] },
+        { "title": "Bichota", "artist": "Karol G", "moods": ["empoderador", "seguridad", "fiesta"] },
+        { "title": "Tití Me Preguntó", "artist": "Bad Bunny", "moods": ["fiesta", "divertido", "baile"] },
+        { "title": "Me Porto Bonito", "artist": "Bad Bunny & Chencho Corleone", "moods": ["sensual", "seguridad", "fiesta"] },
+        { "title": "Safaera", "artist": "Bad Bunny, Jowell & Randy, Ñengo Flow", "moods": ["perreo", "fiesta", "energía"] },
+        { "title": "Mi Gente", "artist": "J Balvin & Willy William", "moods": ["fiesta", "baile", "energía"] },
+        { "title": "Pepas", "artist": "Farruko", "moods": ["fiesta", "energía", "noche"] },
+        { "title": "Hawái", "artist": "Maluma", "moods": ["desamor", "indirecta", "elegante"] },
+        { "title": "La Bebé (Remix)", "artist": "Yng Lvcas & Peso Pluma", "moods": ["fiesta", "sensual", "noche"] }
+      ]
+    },
+    {
+      "genre": "Pop latino",
+      "aliases": ["pop", "pop latino", "pop en español", "latino"],
+      "songs": [
+        { "title": "Hips Don't Lie", "artist": "Shakira ft. Wyclef Jean", "moods": ["baile", "fiesta", "sensual"] },
+        { "title": "Waka Waka (Esto es África)", "artist": "Shakira", "moods": ["energía", "alegre", "motivador"] },
+        { "title": "Shakira: Bzrp Music Sessions, Vol. 53", "artist": "Bizarrap & Shakira", "moods": ["empoderador", "indirecta", "desamor"] },
+        { "title": "TQG", "artist": "Karol G & Shakira", "moods": ["empoderador", "indirecta", "seguridad"] },
+        { "title": "Bailando", "artist": "Enrique Iglesias ft. Descemer Bueno & Gente de Zona", "moods": ["baile", "verano", "alegre"] },
+        { "title": "La Bachata", "artist": "Manuel Turizo", "moods": ["romántico", "nostálgico", "baile"] },
+        { "title": "Corazón Partío", "artist": "Alejandro Sanz", "moods": ["desamor", "clásico", "nostálgico"] },
+        { "title": "Tu Falta de Querer", "artist": "Mon Laferte", "moods": ["desamor", "triste", "intenso"] }
+      ]
+    },
+    {
+      "genre": "Pop en inglés",
+      "aliases": ["pop en ingles", "pop ingles", "english pop", "pop anglo", "ingles", "inglés"],
+      "songs": [
+        { "title": "Flowers", "artist": "Miley Cyrus", "moods": ["empoderador", "amor propio", "seguridad"] },
+        { "title": "Espresso", "artist": "Sabrina Carpenter", "moods": ["divertido", "seguridad", "verano"] },
+        { "title": "Levitating", "artist": "Dua Lipa", "moods": ["fiesta", "alegre", "baile"] },
+        { "title": "Houdini", "artist": "Dua Lipa", "moods": ["fiesta", "noche", "seguridad"] },
+        { "title": "Blinding Lights", "artist": "The Weeknd", "moods": ["noche", "energía", "retro"] },
+        { "title": "As It Was", "artist": "Harry Styles", "moods": ["nostálgico", "relajado", "alegre"] },
+        { "title": "Watermelon Sugar", "artist": "Harry Styles", "moods": ["verano", "alegre", "relajado"] },
+        { "title": "Shake It Off", "artist": "Taylor Swift", "moods": ["divertido", "amor propio", "alegre"] },
+        { "title": "Anti-Hero", "artist": "Taylor Swift", "moods": ["introspectivo", "honesto", "divertido"] },
+        { "title": "bad guy", "artist": "Billie Eilish", "moods": ["misterioso", "seguridad", "oscuro"] },
+        { "title": "Uptown Funk", "artist": "Mark Ronson ft. Bruno Mars", "moods": ["fiesta", "divertido", "energía"] },
+        { "title": "Happy", "artist": "Pharrell Williams", "moods": ["alegre", "buena vibra", "divertido"] },
+        { "title": "Dance Monkey", "artist": "Tones and I", "moods": ["divertido", "baile", "energía"] }
+      ]
+    },
+    {
+      "genre": "Electrónica",
+      "aliases": ["electronica", "edm", "house", "dance", "techno", "dj"],
+      "songs": [
+        { "title": "Titanium", "artist": "David Guetta ft. Sia", "moods": ["motivador", "épico", "empoderador"] },
+        { "title": "Wake Me Up", "artist": "Avicii", "moods": ["viaje", "motivador", "alegre"] },
+        { "title": "Levels", "artist": "Avicii", "moods": ["fiesta", "energía", "euforia"] },
+        { "title": "Lean On", "artist": "Major Lazer & DJ Snake ft. MØ", "moods": ["fiesta", "verano", "baile"] },
+        { "title": "Summer", "artist": "Calvin Harris", "moods": ["verano", "alegre", "viaje"] },
+        { "title": "One Kiss", "artist": "Calvin Harris & Dua Lipa", "moods": ["fiesta", "sensual", "noche"] },
+        { "title": "Animals", "artist": "Martin Garrix", "moods": ["energía", "fiesta", "intenso"] },
+        { "title": "Turn Down for What", "artist": "DJ Snake & Lil Jon", "moods": ["fiesta", "energía", "divertido"] },
+        { "title": "Don't You Worry Child", "artist": "Swedish House Mafia ft. John Martin", "moods": ["nostálgico", "emotivo", "épico"] }
+      ]
+    },
+    {
+      "genre": "Romántica",
+      "aliases": ["romantica", "romántico", "romantico", "amor", "baladas", "balada"],
+      "songs": [
+        { "title": "Perfect", "artist": "Ed Sheeran", "moods": ["romántico", "pareja", "tierno"] },
+        { "title": "Thinking Out Loud", "artist": "Ed Sheeran", "moods": ["romántico", "pareja", "elegante"] },
+        { "title": "All of Me", "artist": "John Legend", "moods": ["romántico", "pareja", "emotivo"] },
+        { "title": "Die With A Smile", "artist": "Lady Gaga & Bruno Mars", "moods": ["romántico", "emotivo", "intenso"] },
+        { "title": "Propuesta Indecente", "artist": "Romeo Santos", "moods": ["sensual", "romántico", "baile"] },
+        { "title": "La Bachata", "artist": "Manuel Turizo", "moods": ["romántico", "nostálgico", "baile"] },
+        { "title": "Amor Eterno", "artist": "Rocío Dúrcal", "moods": ["emotivo", "homenaje", "triste"] }
+      ]
+    },
+    {
+      "genre": "Salsa / Bachata",
+      "aliases": ["salsa", "bachata", "tropical", "caribe"],
+      "songs": [
+        { "title": "Vivir Mi Vida", "artist": "Marc Anthony", "moods": ["alegre", "motivador", "fiesta"] },
+        { "title": "Valió la Pena", "artist": "Marc Anthony", "moods": ["romántico", "baile", "alegre"] },
+        { "title": "La Vida Es Un Carnaval", "artist": "Celia Cruz", "moods": ["alegre", "clásico", "buena vibra"] },
+        { "title": "Pedro Navaja", "artist": "Rubén Blades", "moods": ["clásico", "historia", "barrio"] },
+        { "title": "Idilio", "artist": "Willie Colón", "moods": ["romántico", "clásico", "nostálgico"] },
+        { "title": "Obsesión", "artist": "Aventura", "moods": ["romántico", "intenso", "clásico"] },
+        { "title": "Propuesta Indecente", "artist": "Romeo Santos", "moods": ["sensual", "baile", "romántico"] },
+        { "title": "Darte un Beso", "artist": "Prince Royce", "moods": ["romántico", "tierno", "baile"] },
+        { "title": "Stand by Me", "artist": "Prince Royce", "moods": ["romántico", "pareja", "tierno"] }
+      ]
+    },
+    {
+      "genre": "Rap / Trap",
+      "aliases": ["rap", "trap", "hip hop", "hiphop", "urbano en ingles"],
+      "songs": [
+        { "title": "SICKO MODE", "artist": "Travis Scott", "moods": ["energía", "intenso", "noche"] },
+        { "title": "HUMBLE.", "artist": "Kendrick Lamar", "moods": ["seguridad", "actitud", "intenso"] },
+        { "title": "Not Like Us", "artist": "Kendrick Lamar", "moods": ["actitud", "fiesta", "indirecta"] },
+        { "title": "God's Plan", "artist": "Drake", "moods": ["motivador", "gratitud", "relajado"] },
+        { "title": "Lose Yourself", "artist": "Eminem", "moods": ["motivador", "esfuerzo", "intenso"] },
+        { "title": "Quevedo: Bzrp Music Sessions, Vol. 52", "artist": "Bizarrap & Quevedo", "moods": ["fiesta", "noche", "energía"] },
+        { "title": "Ella Quiere Beber", "artist": "Anuel AA", "moods": ["fiesta", "noche", "desamor"] }
+      ]
+    },
+    {
+      "genre": "Regional mexicano",
+      "aliases": ["regional", "corridos", "corridos tumbados", "mariachi", "banda", "norteño", "sierreño", "mexicano"],
+      "songs": [
+        { "title": "Ella Baila Sola", "artist": "Eslabon Armado & Peso Pluma", "moods": ["romántico", "baile", "noche"] },
+        { "title": "Qué Onda", "artist": "Calle 24, Chino Pacas & Fuerza Regida", "moods": ["actitud", "fiesta", "seguridad"] },
+        { "title": "Lady Gaga", "artist": "Peso Pluma, Gabito Ballesteros & Junior H", "moods": ["elegante", "seguridad", "noche"] },
+        { "title": "PRC", "artist": "Peso Pluma & Natanael Cano", "moods": ["actitud", "fiesta", "energía"] },
+        { "title": "Un x100to", "artist": "Grupo Frontera & Bad Bunny", "moods": ["desamor", "nostálgico", "emotivo"] },
+        { "title": "El Rey", "artist": "Vicente Fernández", "moods": ["clásico", "orgullo", "fiesta"] },
+        { "title": "Amor Eterno", "artist": "Rocío Dúrcal", "moods": ["emotivo", "homenaje", "triste"] }
+      ]
+    },
+    {
+      "genre": "Cumbia",
+      "aliases": ["cumbia", "cumbias", "sonidera", "cumbia sonidera", "vallenato"],
+      "songs": [
+        { "title": "La Pollera Colorá", "artist": "Wilson Choperena", "moods": ["fiesta", "clásico", "alegre"] },
+        { "title": "Cariñito", "artist": "Los Hijos del Sol", "moods": ["nostálgico", "romántico", "clásico"] },
+        { "title": "Nunca Es Suficiente", "artist": "Los Ángeles Azules ft. Natalia Lafourcade", "moods": ["romántico", "baile", "nostálgico"] },
+        { "title": "Amor a Primera Vista", "artist": "Los Ángeles Azules, Belinda, Lalo Ebratt & Horacio Palencia", "moods": ["romántico", "alegre", "baile"] },
+        { "title": "17 Años", "artist": "Los Ángeles Azules", "moods": ["nostálgico", "romántico", "baile"] },
+        { "title": "El Listón de Tu Pelo", "artist": "Los Ángeles Azules", "moods": ["romántico", "tierno", "baile"] }
+      ]
+    },
+    {
+      "genre": "Rock",
+      "aliases": ["rock", "rock en español", "alternativo", "indie"],
+      "songs": [
+        { "title": "Don't Stop Me Now", "artist": "Queen", "moods": ["alegre", "energía", "divertido"] },
+        { "title": "Bohemian Rhapsody", "artist": "Queen", "moods": ["épico", "dramático", "clásico"] },
+        { "title": "Seven Nation Army", "artist": "The White Stripes", "moods": ["actitud", "intenso", "deporte"] },
+        { "title": "Mr. Brightside", "artist": "The Killers", "moods": ["energía", "nostálgico", "fiesta"] },
+        { "title": "Livin' on a Prayer", "artist": "Bon Jovi", "moods": ["motivador", "clásico", "energía"] },
+        { "title": "De Música Ligera", "artist": "Soda Stereo", "moods": ["nostálgico", "clásico", "energía"] },
+        { "title": "Persiana Americana", "artist": "Soda Stereo", "moods": ["sensual", "retro", "noche"] },
+        { "title": "Lamento Boliviano", "artist": "Enanitos Verdes", "moods": ["nostálgico", "emotivo", "clásico"] }
+      ]
+    },
+    {
+      "genre": "Lo-fi / Chill",
+      "aliases": ["lofi", "lo-fi", "chill", "relajado", "tranquila", "tranquilo", "acustico", "acústico"],
+      "songs": [
+        { "title": "Sunflower", "artist": "Post Malone & Swae Lee", "moods": ["relajado", "alegre", "verano"] },
+        { "title": "Riptide", "artist": "Vance Joy", "moods": ["relajado", "viaje", "alegre"] },
+        { "title": "Location", "artist": "Khalid", "moods": ["relajado", "romántico", "noche"] },
+        { "title": "Golden Hour", "artist": "JVKE", "moods": ["romántico", "atardecer", "emotivo"] },
+        { "title": "Here Comes the Sun", "artist": "The Beatles", "moods": ["alegre", "mañana", "buena vibra"] },
+        { "title": "Lovely Day", "artist": "Bill Withers", "moods": ["alegre", "buena vibra", "mañana"] },
+        { "title": "Sweater Weather", "artist": "The Neighbourhood", "moods": ["melancólico", "otoño", "relajado"] }
+      ]
+    },
+    {
+      "genre": "Motivacional",
+      "aliases": ["motivacional", "motivacion", "motivación", "gym", "gimnasio", "deporte", "fitness", "entrenamiento"],
+      "songs": [
+        { "title": "Eye of the Tiger", "artist": "Survivor", "moods": ["motivador", "deporte", "clásico"] },
+        { "title": "Believer", "artist": "Imagine Dragons", "moods": ["motivador", "intenso", "deporte"] },
+        { "title": "Stronger", "artist": "Kanye West", "moods": ["motivador", "deporte", "actitud"] },
+        { "title": "Hall of Fame", "artist": "The Script ft. will.i.am", "moods": ["motivador", "logro", "épico"] },
+        { "title": "Unstoppable", "artist": "Sia", "moods": ["empoderador", "motivador", "seguridad"] },
+        { "title": "Fighter", "artist": "Christina Aguilera", "moods": ["empoderador", "actitud", "intenso"] },
+        { "title": "Survivor", "artist": "Destiny's Child", "moods": ["empoderador", "amor propio", "actitud"] },
+        { "title": "Lose Yourself", "artist": "Eminem", "moods": ["motivador", "esfuerzo", "intenso"] }
+      ]
+    }
+  ]
+}

@@ -1,21 +1,13 @@
-# Entorno y caché de Python
-.venv/
-__pycache__/
-*.pyc
-
-# Configuración local de cada equipo (plantilla: .env.example)
+node_modules/
+dist/
 .env
-
-# Generado en ejecución
-temp/*
-!temp/.gitkeep
-output/*
-!output/.gitkeep
-bin/
-*.log
-
-# Videos de fondo: demasiado pesados para git (se descargan con descargar_fondos.py)
-assets/backgrounds/*.mp4
-assets/backgrounds/*.mov
-assets/backgrounds/*.mkv
-assets/backgrounds/*.webm
+storage/inputs/*
+storage/outputs/*
+storage/temp/*
+!storage/**/.gitkeep
+ai-workers/.venv/
+ai-workers/models/
+__pycache__/
+data/tiktok-trends.json
+storage/jobs.json
+storage/recent-music.json

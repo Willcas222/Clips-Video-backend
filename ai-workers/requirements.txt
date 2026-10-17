@@ -1,0 +1,17 @@
+# Workers de IA multimedia (Python 3.10 - 3.12 recomendado)
+# En equipos sin GPU NVIDIA instala torch CPU primero para ahorrar ~2 GB:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
+torchvision
+diffusers>=0.30
+spandrel>=0.4          # Carga Real-ESRGAN sin depender de basicsr
+opencv-python-headless>=4.9
+numpy
+pillow
+faster-whisper>=1.0
+rembg[cpu]>=2.0       # Segmentación de personas (modo retrato)
+# Aislar la voz de los clips. torchaudio ya no existe para torch>=2.12: instalar demucs SIN dependencias:
+#   pip install --no-deps demucs && pip install einops julius dora-search pyyaml tqdm
+einops
+julius
+dora-search
